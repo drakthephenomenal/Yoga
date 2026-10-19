@@ -1,12 +1,10 @@
 var P={
  av:{name:"Anulom Vilom",alt:true,lv:[[4,0,4,0],[4,0,6,0],[4,0,8,0],[5,0,10,0],[6,0,12,0]]},
- ak:{name:"Antar Kumbhak",alt:true,lv:[[4,2,4,0],[4,4,8,0],[4,8,8,0],[4,12,8,0],[4,16,8,0]]},
- bk:{name:"Bahya Kumbhak",alt:false,lv:[[4,0,4,2],[4,0,8,4],[4,0,8,6],[4,0,8,8]]},
- ck:{name:"Both Kumbhak",alt:true,lv:[[4,2,4,2],[4,4,8,4],[4,8,8,4],[4,12,8,6],[4,16,8,8]]}
+ ck:{name:"Kumbhak",alt:false,lv:[[4,2,4,2],[4,4,8,4],[4,8,8,4],[4,12,8,6],[4,16,8,8]]}
 };
-var S={mode:"av",lv:{av:0,ak:0,bk:0,ck:0},done:{},rounds:5,sound:true,auto:false};
+var S={mode:"av",lv:{av:0,ck:0},done:{},rounds:5,sound:true,auto:false};
 try{var sv=JSON.parse(localStorage.getItem("pranayama")||"null");if(sv)S=Object.assign(S,sv)}catch(e){}
-S.lv=Object.assign({av:0,ak:0,bk:0,ck:0},S.lv);
+S.lv=Object.assign({av:0,ck:0},S.lv);if(!P[S.mode])S.mode="av";
 function save(){try{localStorage.setItem("pranayama",JSON.stringify(S))}catch(e){}}
 var $=function(i){return document.getElementById(i)},ac=null,run;
 function g(a,b){return b?g(b,a%b):a}
@@ -87,11 +85,12 @@ function tick(now){
 }
 function draw(){
  var L=$("nL"),R=$("nR");L.className=R.className="";
+ L.parentNode.style.display=P[S.mode].alt?"":"none";
  if(!run.started){
   cursor(0);
   $("ph").textContent="Ready";$("cd").textContent="–";
   $("hint").textContent="Sit tall, relax your shoulders. Tap Start.";
-  $("stat").textContent=S.rounds+" rounds · "+(P[S.mode].alt?"left ↔ right":"both nostrils");return;
+  $("stat").textContent=S.rounds+" rounds · "+(P[S.mode].alt?"left ↔ right":"inhale · hold · exhale · hold");return;
  }
  var ph=G.ph[run.i],alt=P[S.mode].alt,left=run.breath%2==0,h;
  cursor(G.start[run.i]+run.el);
@@ -102,7 +101,7 @@ function draw(){
   if(ph.t==0)(left?L:R).className="on";
   if(ph.t==2)(left?R:L).className="on";
  } else {
-  h=["Inhale through both nostrils","Hold","Exhale slowly","Hold empty · gently draw the belly in"][ph.t];
+  h=["Inhale","Hold","Exhale","Hold empty"][ph.t];
   if(ph.t==0||ph.t==2)L.className=R.className="on";
  }
  $("hint").textContent=h;
