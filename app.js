@@ -167,7 +167,7 @@ $("rs").onclick=function(){reset();draw()};
 $("auto").onchange=function(){S.auto=this.checked;save()};
 $("snd").onchange=function(){S.sound=this.checked;save()};
 $("rt").onchange=function(){S.right=this.checked;reset();save();ui()};
-cv=$("gr");cx=cv.getContext("2d");sizeCanvas();
+cv=$("gr");cv.style.height="220px";cx=cv.getContext("2d");sizeCanvas();$("ver").textContent="v7";
 window.addEventListener("resize",sizeCanvas);
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",colors)}catch(e){}
 reset();ui();requestAnimationFrame(tick);
