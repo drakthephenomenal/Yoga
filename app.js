@@ -28,7 +28,7 @@ function buildGraph(){
  G.pts.forEach(function(p,i){if(i>0&&i<G.pts.length-1)s+='<line class="gl" x1="'+p[0]+'" x2="'+p[0]+'" y1="'+(G.HI-12)+'" y2="'+(G.LO+12)+'"/>'});
  s+='<path class="tgt" d="'+d+'"/><g clip-path="url(#cp)"><path class="fil" d="'+area+'"/><path class="lin" d="'+d+'"/></g><circle id="dot" class="dot" r="9" cx="'+X0+'" cy="'+G.LO+'"/>';
  G.ph.forEach(function(p,i){var x=(G.pts[i][0]+G.pts[i+1][0])/2;
-  s+='<text x="'+x+'" y="190">'+nm[p.t]+'</text><text x="'+x+'" y="203">'+p.d+'s</text>'});
+  s+='<text id="lb'+i+'" x="'+x+'" y="190">'+nm[p.t]+'</text><text x="'+x+'" y="203">'+p.d+'s</text>'});
  $("gr").innerHTML=s;
 }
 function cursor(tt){
@@ -83,11 +83,32 @@ function tick(now){
  }
  draw();requestAnimationFrame(tick);
 }
+function setSeq(c){
+ if(!P[S.mode].alt)return;
+ var st=[["L","in"],["R","out"],["R","in"],["L","out"]],
+ h=st.map(function(s,i){return '<span class="'+(i==c?"cur":"")+'">'+s[0]+" "+s[1]+'</span>'}).join(" → ");
+ if(h!==setSeq.h){setSeq.h=h;$("seq").innerHTML=h}
+}
+function setLabels(left){
+ G.ph.forEach(function(p,i){
+  var el=$("lb"+i),n=["Inhale","Hold","Exhale","Hold"][p.t];
+  if(!el)return;
+  if(P[S.mode].alt){if(p.t==0)n="In · "+(left?"L":"R");else if(p.t==2)n="Out · "+(left?"R":"L")}
+  el.textContent=n;
+ });
+}
+function chips(){
+ var L=$("nL"),R=$("nR");
+ [[L,"Left"],[R,"Right"]].forEach(function(c){
+  var cl=c[0].className;
+  c[0].textContent=c[1]+(cl.indexOf(" in")>-1?" · IN":cl.indexOf(" out")>-1?" · OUT":"");
+ });
+}
 function draw(){
  var L=$("nL"),R=$("nR");L.className=R.className="";
- L.parentNode.style.display=P[S.mode].alt?"":"none";
+ L.parentNode.style.display=$("seq").style.display=P[S.mode].alt?"":"none";
  if(!run.started){
-  cursor(0);
+  cursor(0);setLabels(true);setSeq(-1);chips();
   $("ph").textContent="Ready";$("cd").textContent="–";
   $("hint").textContent="Sit tall, relax your shoulders. Tap Start.";
   $("stat").textContent=S.rounds+" rounds · "+(P[S.mode].alt?"left ↔ right":"inhale · hold · exhale · hold");return;
@@ -98,13 +119,14 @@ function draw(){
  $("cd").textContent=Math.max(1,Math.ceil(ph.d-run.el));
  if(alt){
   h=["Inhale through the "+(left?"left":"right")+" nostril","Close both nostrils · hold","Exhale through the "+(left?"right":"left")+" nostril","Hold empty · both closed"][ph.t];
-  if(ph.t==0)(left?L:R).className="on";
-  if(ph.t==2)(left?R:L).className="on";
+  if(ph.t==0)(left?L:R).className="on in";
+  if(ph.t==2)(left?R:L).className="on out";
  } else {
   h=["Inhale","Hold","Exhale","Hold empty"][ph.t];
   if(ph.t==0||ph.t==2)L.className=R.className="on";
  }
  $("hint").textContent=h;
+ setLabels(left);chips();setSeq((left?0:2)+(ph.t==2?1:0));
  $("stat").textContent="Round "+Math.min(S.rounds,rounds()+1)+" of "+S.rounds;
 }
 document.addEventListener("click",function(e){
